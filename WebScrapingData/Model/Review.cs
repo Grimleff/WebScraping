@@ -5,7 +5,7 @@ namespace WebScrapingData.Model
 {
     public class Review
     {
-        [KeyAttribute]
+        [Key]
         [Column("id_review")]
         public long IdReview{get;set;}
         [Column("comment")]

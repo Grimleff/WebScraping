@@ -6,13 +6,13 @@ using WebScrapingData.Model;
 
 namespace WebScrapingData.Context
 {
-    public class CustomerReviewContext : DbContext 
+    public class ScrapingContext : DbContext 
     {
         public DbSet<Product> Products { get; set; }
         public DbSet<Review> Reviews { get; set; }
 
         public string DbPath { get; }
-        public CustomerReviewContext()
+        public ScrapingContext()
         {
             var folder = Environment.SpecialFolder.LocalApplicationData;
             var path = Environment.GetFolderPath(folder);

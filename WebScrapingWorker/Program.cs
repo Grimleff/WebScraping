@@ -5,14 +5,19 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using WebScrapingData.Extensions;
+using WebScrapingData.Repository.Implementation;
+using WebScrapingData.Repository.Interfaces;
 using WebScrapingWorker.Config;
 using WebScrapingWorker.Extensions;
-using WebScrapingWorker.Service;
+using WebScrapingWorker.BgService;
+using WebScrapingWorker.Service.Implementation;
+using WebScrapingWorker.Service.Interfaces;
 
 namespace WebScrapingWorker
 {
-    public class Program
+    public static class Program
     {
         private static readonly IConfiguration Configuration;
         static Program()
@@ -26,13 +31,20 @@ namespace WebScrapingWorker
             CreateHostBuilder(args).Build().Run();
         }
 
-        public static IHostBuilder CreateHostBuilder(string[] args) =>
+        private static IHostBuilder CreateHostBuilder(string[] args) =>
             Host.CreateDefaultBuilder(args)
+                .ConfigureLogging(logging =>
+                {
+                    logging.ClearProviders();
+                    logging.AddConsole();
+                })
                 .ConfigureServices((hostContext, services) =>
                 {
                     services.AddFromConfiguration<AppConfig>(Configuration);
                     services.AddDatabase();
-                    services.AddHostedService<ScrapingService>();
+                    services.AddTransient<IScrapingRepository, ScrapingRepository>();
+                    services.AddTransient<IScrapingService, ScrapingService>();
+                    services.AddHostedService<WebScrapingService>();
                 });
     }
 }

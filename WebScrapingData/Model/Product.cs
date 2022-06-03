@@ -4,7 +4,7 @@ namespace WebScrapingData.Model
 {
     public class Product
     {
-        [KeyAttribute]
+        [Key]
         [Column("id_product"),]
         public string IdProduct{get;set;}
         [Column("product_name")]
