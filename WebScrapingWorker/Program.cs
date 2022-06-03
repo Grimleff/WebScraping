@@ -44,6 +44,7 @@ namespace WebScrapingWorker
                     services.AddDatabase();
                     services.AddTransient<IScrapingRepository, ScrapingRepository>();
                     services.AddTransient<IScrapingService, ScrapingService>();
+                    services.AddHttpClient<IScrapingService, ScrapingService>();
                     services.AddHostedService<WebScrapingService>();
                 });
     }
