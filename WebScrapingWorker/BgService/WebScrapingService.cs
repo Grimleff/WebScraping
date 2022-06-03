@@ -28,20 +28,12 @@ namespace WebScrapingWorker.BgService
             while (!stoppingToken.IsCancellationRequested)
                 try
                 {
-                    var product = new Product
-                    {
-                        IdProduct = "ABCDEF",
-                        ProductName = "Smartphone"
-                    };
-                    await _scrapingService.AddNewProduct(product);
-                    
+                    await _scrapingService.GetProductsDataFromAmazonWebPage();
                     _logger.LogInformation(
                         $"Success running background service {typeof(WebScrapingService).FullName} at {DateTime.UtcNow}");
                 }
                 catch (Exception e)
                 {
-
-                    
                     _logger.LogError(
                         $"Failed running background service {typeof(WebScrapingService).FullName} at {DateTime.UtcNow} : {e.Message}");
                 }

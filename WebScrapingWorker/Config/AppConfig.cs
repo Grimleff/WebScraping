@@ -6,5 +6,6 @@ namespace WebScrapingWorker.Config
     public class AppConfig
     {
         public int BackgroundServiceCycleInSecond { get; set; }
+        public string AmazonBaseUrl { get; set; }
     }
 }

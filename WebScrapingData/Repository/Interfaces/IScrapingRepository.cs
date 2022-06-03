@@ -9,15 +9,20 @@ namespace WebScrapingData.Repository.Interfaces
         Task<Product> GetProductAsync(string idProduct);
         Task<IEnumerable<Product>> GetProductsAsync();
         
-        void AddProductAsync(Product product);
-        void AddProductsAsync(IEnumerable<Product> products);
+        Task<int> AddProductAsync(Product product);
+        Task<int> AddProductsAsync(IEnumerable<Product> products);
+        Task<int> UpdateProductAsync(Product product);
 
         Task<Review> GetReviewAsync(long idReview);
         Task<IEnumerable<Review>> GetReviewAsync();
 
-        void AddReviewAsync(Review review);
-        void AddReviewsAsync(IEnumerable<Review> reviews);
+        Task<int> AddReviewAsync(Review review);
+        Task<int> AddReviewsAsync(IEnumerable<Review> reviews);
 
+        Task<int> UpdateReviewAsync(Review review);
 
+        Task<int> AddOrUpdateProduct(Product product);
+
+        Task<int> AddOrUpdateReview(Review review);
     }
 }
