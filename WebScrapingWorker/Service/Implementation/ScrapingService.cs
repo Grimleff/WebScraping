@@ -4,6 +4,7 @@ using System.IO.Compression;
 using System.Net.Http;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
+using HtmlAgilityPack;
 using WebScrapingData.Model;
 using WebScrapingData.Repository.Interfaces;
 using WebScrapingWorker.Config;
@@ -42,84 +43,41 @@ namespace WebScrapingWorker.Service.Implementation
                 if (!response.IsSuccessStatusCode)
                     continue;
                 //response.EnsureSuccessStatusCode();
-
+ 
                 await using var responseStream = await response.Content.ReadAsStreamAsync();
                 await using var deflateStream = new GZipStream(responseStream, CompressionMode.Decompress);
                 using var streamReader = new StreamReader(deflateStream);
                 
-                var str = await streamReader.ReadToEndAsync();
-                Console.WriteLine(str);
-                
-                await using (var outputFile = new StreamWriter(Path.Combine(@"C:\Users\rpoir", "WriteTextAsync.txt")))
+                var html = await streamReader.ReadToEndAsync();
+                var htmlDoc = new HtmlDocument();
+                htmlDoc.LoadHtml(html);
+                var webReviews =
+                    htmlDoc
+                        .DocumentNode
+                        .SelectSingleNode("//div[@id='cm_cr-review_list']")
+                        .SelectNodes("//div[@data-hook='review']");
+
+                foreach (var webReview in webReviews)
                 {
-                    await outputFile.WriteAsync(str);
+                    var title = webReview.SelectSingleNode("//a[@class='a-size-base a-link-normal review-title a-color-base review-title-content a-text-bold']/span").InnerText;
+                    var content = webReview.SelectSingleNode("//span[@class='a-size-base review-text review-text-content']")
+                        .InnerText
+                        .Trim()
+                        .Replace(@"\n","");
+                    //
+                    var reviewCard = webReview.Id;
+                    //review-star-rating
+                    var reviewStar = webReview.SelectSingleNode("//i[@data-hook='review-star-rating']/span");
+                    var reviewCountry = "";
+                    var reviewDate = webReview.SelectSingleNode("//span[@data-hook='review-date']");
+                    //avp-badge
+                    var reviewVerified = webReview.SelectSingleNode("//span[@data-hook='avp-badge']");
+                    //helpful-vote-statement
+                    var reviewValidation = webReview.SelectSingleNode("//span[@data-hook='helpful-vote-statement']");
+
                 }
-
                 
-                /*var browser = new Browser();
-                browser.HttpClient.DefaultRequestHeaders.Add("User-Agent", 
-                                    "Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10.4; en-US; rv:1.9.2.2) Gecko/20100316 Firefox/3.6.2");
-
-                var page = await browser.Open(amazonAddress);
-
-                //var myIp = page.Select("#ip").Text();
-
-
-
-
-                HtmlAgilityPack.HtmlWeb web = new HtmlAgilityPack.HtmlWeb();
-
-                web.UserAgent = "Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10.4; en-US; rv:1.9.2.2) Gecko/20100316 Firefox/3.6.2";
-
-                HtmlAgilityPack.HtmlDocument doc = web.Load(amazonAddress);
-                var agilityNodes = doc.DocumentNode.SelectNodes("//a[@class='a-section review aok-relative']");
-
-                var handler = new HttpClientHandler
-                {
-                    UseCookies = true,
-                };
-
-                var httpClient = new HttpClient(handler)
-                {
-                    BaseAddress = new Uri(amazonAddress),
-                };
-                httpClient.DefaultRequestHeaders.TryAddWithoutValidation("Accept-Encoding", "gzip, deflate");
-
-                httpClient.DefaultRequestHeaders.Add("User-Agent","Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10.4; en-US; rv:1.9.2.2) Gecko/20100316 Firefox/3.6.2");
-
-
-                var result = httpClient.GetAsync("").Result;
-
-                string strData = "";
-
-
-                strData = result.Content.ReadAsStringAsync().Result;
-
-
-
-                var response = await httpClient.GetByteArrayAsync(amazonAddress);
-                var responseString = Encoding.UTF8.GetString(response, 0, response.Length - 1);
-
-                var response2 = await httpClient.GetAsync(amazonAddress);
-                var contenttype = response2.Content.Headers.First(h => h.Key.Equals("Content-Type"));
-                var rawencoding = contenttype.Value.First();
-
-                if (rawencoding.Contains("utf8") || rawencoding.Contains("UTF-8"))
-                {
-                    var bytes = await response2.Content.ReadAsByteArrayAsync();
-                    var finalRes =  Encoding.UTF8.GetString(bytes);
-                }
-
-
-
-                HtmlDocument htmlDocument = new();
-                htmlDocument.LoadHtml(strData);
-
-                var nodes = htmlDocument.DocumentNode.SelectNodes("//div[@class='a-section review aok-relative']");
-                foreach (var node in nodes)
-                {
-                    System.Console.WriteLine(node.InnerHtml);
-                }*/
+     
             }
             await Task.CompletedTask;
         }
