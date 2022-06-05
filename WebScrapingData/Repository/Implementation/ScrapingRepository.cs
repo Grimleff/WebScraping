@@ -13,9 +13,9 @@ namespace WebScrapingData.Repository.Implementation
         {
         }
 
-        public async Task<Product> GetProductAsync(string idProduct)
+        public async Task<Product> GetProductAsync(string productAsin)
         {
-            return await Db.FindAsync<Product>(idProduct);
+            return await Db.Products.FirstOrDefaultAsync(x => x.ProductAsin.Equals(productAsin));
         }
 
         public async Task<IEnumerable<Product>> GetProductsAsync()
@@ -37,15 +37,15 @@ namespace WebScrapingData.Repository.Implementation
 
         public async Task<int> UpdateProductAsync(Product product)
         {
-            var dbProduct = await Db.Products.FirstOrDefaultAsync(x => x.IdProduct.Equals(product.IdProduct));
+            var dbProduct = await Db.Products.FirstOrDefaultAsync(x => x.ProductAsin.Equals(product.ProductAsin));
+            product.IdProduct = dbProduct.IdProduct;
             Db.Entry(dbProduct).CurrentValues.SetValues(product);
             return await Db.SaveChangesAsync();
-
         }
 
-        public async Task<Review> GetReviewAsync(long idReview)
+        public async Task<Review> GetReviewAsync(string reviewCard)
         {
-            return await Db.FindAsync<Review>(idReview);
+            return await Db.Reviews.FirstOrDefaultAsync(x=>x.Card.Equals(reviewCard));
         }
 
         public async Task<IEnumerable<Review>> GetReviewAsync()
@@ -67,14 +67,15 @@ namespace WebScrapingData.Repository.Implementation
 
         public async Task<int> UpdateReviewAsync(Review review)
         {
-            var dbReview = await Db.Reviews.FirstOrDefaultAsync(x => x.IdReview.Equals(review.IdReview));
+            var dbReview = await Db.Reviews.FirstOrDefaultAsync(x => x.Card.Equals(review.Card));
+            review.IdReview = dbReview.IdReview;
             Db.Entry(dbReview).CurrentValues.SetValues(review);
             return await Db.SaveChangesAsync();
         }
         
         public async Task<int> AddOrUpdateProduct(Product product)
         {
-            var dbProduct = await GetProductAsync(product.IdProduct);
+            var dbProduct = await GetProductAsync(product.ProductAsin);
             if (dbProduct == null)
             {
                 return await AddProductAsync(product);
@@ -85,7 +86,7 @@ namespace WebScrapingData.Repository.Implementation
         
         public async Task<int> AddOrUpdateReview(Review review)
         {
-            var dbReview = await GetReviewAsync(review.IdReview);
+            var dbReview = await GetReviewAsync(review.Card);
             if (dbReview == null)
             {
                 return await AddReviewAsync(review);

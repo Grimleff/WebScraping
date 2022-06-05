@@ -28,6 +28,12 @@ namespace WebScrapingWorker.BgService
             while (!stoppingToken.IsCancellationRequested)
                 try
                 {
+                    var productA = new Product
+                    {
+                        ProductAsin = "B082XY23D5",
+                        ProductName = "Galaxy S21"
+                    };
+                    await _scrapingService.AddNewProduct(productA);
                     await _scrapingService.GetProductsDataFromAmazonWebPage();
                     _logger.LogInformation(
                         $"Success running background service {typeof(WebScrapingService).FullName} at {DateTime.UtcNow}");

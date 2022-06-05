@@ -1,5 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using Microsoft.EntityFrameworkCore;
+
 namespace WebScrapingData.Model
 {
     public class Product
@@ -7,10 +9,9 @@ namespace WebScrapingData.Model
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         [Column("id_product"),]
-        public string IdProduct {get;set;}
+        public int IdProduct {get;set;}
         
         [Required]
-
         [Column("product_asin"),]
         public string ProductAsin {get;set;}
         

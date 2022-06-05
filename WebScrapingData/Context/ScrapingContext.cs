@@ -22,5 +22,12 @@ namespace WebScrapingData.Context
             // special "local" folder for your platform.
             protected override void OnConfiguring(DbContextOptionsBuilder options)
                 => options.UseSqlite($"Data Source={DbPath}");
+            
+            protected override void OnModelCreating(ModelBuilder builder)
+            {
+                builder.Entity<Product>()
+                    .HasIndex(p => p.ProductAsin)
+                    .IsUnique();
+            }
     }
 }

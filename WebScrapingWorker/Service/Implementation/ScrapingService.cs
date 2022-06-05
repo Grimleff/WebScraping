@@ -26,12 +26,16 @@ namespace WebScrapingWorker.Service.Implementation
             _logger = logger;
         }
 
+        public async Task AddNewProduct(Product product)
+        {
+            var result = await _scrapingRepository.AddOrUpdateProduct(product);
+        }
         public async Task GetProductsDataFromAmazonWebPage()
         {
             var products = await _scrapingRepository.GetProductsAsync();
             foreach (var product in products)
             {
-                var url = $"{_appConfig.AmazonBaseUrl}/{product.IdProduct}";
+                var url = $"{_appConfig.AmazonBaseUrl}/{product.ProductAsin}";
                 _logger.LogInformation($"url to scrap : {url}");
                 
                 //https://stackoverflow.com/questions/30899113/httpclient-returning-special-characters-but-nothing-readable
@@ -74,6 +78,19 @@ namespace WebScrapingWorker.Service.Implementation
                     var reviewVerified = webReview.SelectSingleNode("//span[@data-hook='avp-badge']");
                     //helpful-vote-statement
                     var reviewValidation = webReview.SelectSingleNode("//span[@data-hook='helpful-vote-statement']");
+
+                    var review = new Review
+                    {
+                        Card = reviewCard,
+                        ReviewComment = content,
+                        ReviewCountry = reviewCountry,
+                        ReviewDate = DateTime.UtcNow,
+                        ReviewStars = 3,
+                        ReviewTitle = title,
+                        ReviewValidation = 0,
+                        ReviewVerified = true
+                    };
+                    await _scrapingRepository.AddOrUpdateReview(review);
 
                 }
                 

@@ -32,6 +32,6 @@ namespace WebScrapingData.Model
         public bool ReviewVerified {get;set;}
         
         [Column("review_validation")]
-        public DateTime ReviewValidation {get;set;}
+        public long ReviewValidation {get;set;}
     }
 }
