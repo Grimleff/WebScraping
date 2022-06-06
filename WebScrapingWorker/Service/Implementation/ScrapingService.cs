@@ -37,7 +37,7 @@ namespace WebScrapingWorker.Service.Implementation
             {
                 //https://www.amazon.com/product-reviews/B082XY23D5/ref=cm_cr_arp_d_paging_btm_next_2?pageNumber=1
 
-                var pageNumber = 23;
+                var pageNumber = 1;
                 var pageExist = true;
                 while (pageExist)
                 {
