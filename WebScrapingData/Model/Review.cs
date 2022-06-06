@@ -36,5 +36,9 @@ namespace WebScrapingData.Model
         
         [Column("review_profile")]
         public string ReviewProfile {get;set;}
+        
+        [Column("product_id")]
+        public int ProductId { get; set; }
+        public Product Product { get; set; }
     }
 }

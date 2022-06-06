@@ -28,6 +28,10 @@ namespace WebScrapingData.Context
                 builder.Entity<Product>()
                     .HasIndex(p => p.ProductAsin)
                     .IsUnique();
+                
+                builder.Entity<Review>()
+                    .HasOne(p => p.Product)
+                    .WithMany(b => b.Reviews);
             }
     }
 }

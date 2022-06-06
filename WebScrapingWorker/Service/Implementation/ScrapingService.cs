@@ -1,7 +1,5 @@
-﻿using System;
-using System.IO;
+﻿using System.IO;
 using System.IO.Compression;
-using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
@@ -39,7 +37,7 @@ namespace WebScrapingWorker.Service.Implementation
             {
                 //https://www.amazon.com/product-reviews/B082XY23D5/ref=cm_cr_arp_d_paging_btm_next_2?pageNumber=1
 
-                var pageNumber = 22;
+                var pageNumber = 23;
                 var pageExist = true;
                 while (pageExist)
                 {
@@ -57,8 +55,7 @@ namespace WebScrapingWorker.Service.Implementation
                         pageExist = false;
                         continue;
                     }
-  
-                    //response.EnsureSuccessStatusCode();
+                    
                     await using var responseStream = await response.Content.ReadAsStreamAsync();
                     await using var deflateStream = new GZipStream(responseStream, CompressionMode.Decompress);
                     using var streamReader = new StreamReader(deflateStream);
@@ -66,65 +63,65 @@ namespace WebScrapingWorker.Service.Implementation
                     var html = await streamReader.ReadToEndAsync();
                     var htmlDoc = new HtmlDocument();
                     htmlDoc.LoadHtml(html);
-                    var webReviews =
+                    var webReviewsRoot =
                         htmlDoc
                             .DocumentNode
-                            .SelectSingleNode("//div[@id='cm_cr-review_list']")
-                            .SelectNodes("//div[@data-hook='review']/div")
-                            .Elements();
+                            .SelectSingleNode("//div[@id='cm_cr-review_list']");
 
-                    foreach (var webReview in webReviews)
+                    if (webReviewsRoot == null)
                     {
-                        var reviewTitleElement = webReview.SelectSingleNode(
-                            ".//*[@data-hook='review-title']/span");
-                        var reviewTitle = reviewTitleElement == null
-                            ? string.Empty
-                            : reviewTitleElement.InnerText;
+                        pageExist = false;
+                        continue;
+                    }
+                    var webReviews = webReviewsRoot
+                        .SelectNodes("//div[@data-hook='review']/div");
+                    
+                    if (webReviews == null)
+                    {
+                        pageExist = false;
+                        continue;
+                    }
 
-                        var reviewContent = webReview.SelectSingleNode(".//span[@class='a-size-base review-text review-text-content']")
-                            .InnerText
-                            .Trim()
-                            .Replace(@"\n","");
-             
-                        var reviewCardElement = webReview.Id;
-                        var reviewCard= reviewCardElement.Split("-").ToList().Last();
+                    foreach (var webReview in webReviews.Elements())
+                    {
+                        var reviewTitle = webReview
+                            .SelectSingleNode(".//*[@data-hook='review-title']/span")
+                            .Title();
+                        
+                        var reviewContent = webReview
+                            .SelectSingleNode(".//span[@class='a-size-base review-text review-text-content']")
+                            .Review();
+
+                        var reviewCard= webReview
+                            .Card();
                
                         //1.0 out of 5 stars
-                        var reviewStarElement = webReview.SelectSingleNode(".//i[@data-hook='%review-star-rating']/span");
-                        var reviewStar = reviewStarElement == null
-                            ? 0
-                            : reviewStarElement.InnerText.ExtractStars();
-                        
-                        //Reviewed in the United States on March 8, 2020
-                        var reviewCountryElement = webReview.SelectSingleNode(".//span[@data-hook='review-date']");
-                        var reviewCountry = reviewCountryElement == null
-                            ? string.Empty
-                            : reviewCountryElement.InnerText.ExtractCountry();
-                        
-                        var reviewDate = webReview.SelectSingleNode(".//span[@data-hook='review-date']")
-                            .InnerText
-                            .ExtractDateTime();
-                        
-           
-                        //Verified Purchase
-                        var reviewVerifiedElement = webReview.SelectSingleNode(".//span[@data-hook='avp-badge']");
-                        var reviewVerified = reviewVerifiedElement != null && reviewVerifiedElement
-                            .InnerText
-                            .CheckVerified();
-                        
-                        //271 people found this helpful
-                        var reviewValidationElement = webReview.SelectSingleNode(".//span[@data-hook='helpful-vote-statement']");
-                        var reviewValidation = reviewValidationElement ==null 
-                            ? 0
-                            : reviewValidationElement
-                                .InnerText
-                                .ExtractReviewValidations();
+                        var reviewStar = webReview
+                            .SelectSingleNode(".//i[contains(@data-hook, 'review-star-rating')]/span")
+                            .Star();
 
-                        var reviewProfileElement = webReview.SelectSingleNode(".//span[@class='a-profile-name']");
-                        var reviewProfile = reviewProfileElement == null
-                            ? string.Empty
-                            : reviewProfileElement
-                            . InnerText;
+                        //Reviewed in the United States on March 8, 2020
+                        var reviewCountry = webReview
+                            .SelectSingleNode(".//span[@data-hook='review-date']")
+                            .Country();
+
+                        var reviewDate = webReview
+                            .SelectSingleNode(".//span[@data-hook='review-date']")
+                            .Date();
+                        
+                        //Verified Purchase
+                        var reviewVerified = webReview
+                            .SelectSingleNode(".//span[@data-hook='avp-badge']")
+                            .IsVerified();
+
+                        //271 people found this helpful
+                        var reviewValidation = webReview
+                            .SelectSingleNode(".//span[@data-hook='helpful-vote-statement']")
+                            .Validations();
+                        
+                        var reviewProfile = webReview
+                            .SelectSingleNode(".//span[@class='a-profile-name']")
+                            .Profile();
                         
 
                         var review = new Review
@@ -137,18 +134,14 @@ namespace WebScrapingWorker.Service.Implementation
                             ReviewTitle = reviewTitle,
                             ReviewValidation = reviewValidation,
                             ReviewVerified = reviewVerified,
-                            ReviewProfile = reviewProfile
+                            ReviewProfile = reviewProfile,
+                            ProductId = product.IdProduct
                         };
                         await _scrapingRepository.AddOrUpdateReview(review);
-
                     }
                     pageNumber++;
                 }
-                
-                
-     
             }
-            await Task.CompletedTask;
         }
     }
 }

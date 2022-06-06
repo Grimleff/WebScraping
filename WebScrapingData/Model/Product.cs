@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using Microsoft.EntityFrameworkCore;
@@ -18,5 +19,7 @@ namespace WebScrapingData.Model
         
         [Column("product_name")]
         public string ProductName{get;set;}
+        
+        public List<Review> Reviews { get; set; }
     }
 }
