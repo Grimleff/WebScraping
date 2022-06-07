@@ -12,9 +12,5 @@ namespace WebScrapingWorker.Hubs
         {
             _logger = logger;
         }
-        public async Task SendMessage(string user, string message)
-        {
-            await Clients.All.SendAsync("ReceiveMessage", user, message);
-        }
     }
 }

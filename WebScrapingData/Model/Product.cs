@@ -26,7 +26,7 @@ namespace WebScrapingData.Model
 
         [Column("last_scraping")]
         [JsonProperty("last_scraping")]
-        public DateTime LastScraping { get; set; }
+        public DateTime? LastScraping { get; set; }
 
         [Column("enable")]
         [JsonProperty("enable")]

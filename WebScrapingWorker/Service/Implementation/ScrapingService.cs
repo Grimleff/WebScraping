@@ -33,11 +33,16 @@ namespace WebScrapingWorker.Service.Implementation
             _appConfig = appConfig;
             _logger = logger;
             _notifHub = notifHub;
+            _httpClient.DefaultRequestHeaders.TryAddWithoutValidation("Accept",
+                "text/html,application/xhtml+xml,application/xml");
+            _httpClient.DefaultRequestHeaders.TryAddWithoutValidation("Accept-Encoding", "gzip, deflate");
+            _httpClient.DefaultRequestHeaders.TryAddWithoutValidation("User-Agent",
+                "Mozilla/5.0 (Windows NT 6.2; WOW64; rv:19.0) Gecko/20100101 Firefox/19.0");
+            _httpClient.DefaultRequestHeaders.TryAddWithoutValidation("Accept-Charset", "ISO-8859-1");
         }
 
         public async Task GetProductsDataFromAmazonWebPage()
         {
-            await _notifHub.Clients.All.SendAsync("ReceiveMessage", "toto", "blague");
             var dbProducts = await _scrapingRepository.GetEnableProductsAsync();
             var products = dbProducts.ToList();
             var swMain = new Stopwatch();
@@ -54,13 +59,7 @@ namespace WebScrapingWorker.Service.Implementation
                 {
                     var url = $"{_appConfig.AmazonBaseUrl}/{product.ProductAsin}?sortBy=recent&pageNumber={pageNumber}";
                     _logger.LogInformation($"url to scrap : {url}");
-
-                    _httpClient.DefaultRequestHeaders.TryAddWithoutValidation("Accept",
-                        "text/html,application/xhtml+xml,application/xml");
-                    _httpClient.DefaultRequestHeaders.TryAddWithoutValidation("Accept-Encoding", "gzip, deflate");
-                    _httpClient.DefaultRequestHeaders.TryAddWithoutValidation("User-Agent",
-                        "Mozilla/5.0 (Windows NT 6.2; WOW64; rv:19.0) Gecko/20100101 Firefox/19.0");
-                    _httpClient.DefaultRequestHeaders.TryAddWithoutValidation("Accept-Charset", "ISO-8859-1");
+                    
                     var response = await _httpClient.GetAsync(url);
                     if (!response.IsSuccessStatusCode)
                     {
@@ -171,14 +170,17 @@ namespace WebScrapingWorker.Service.Implementation
 
                     pageNumber++;
                 }
-
-                product.LastScraping = DateTime.UtcNow;
-                await _scrapingRepository.UpdateProductAsync(product);
+                
+                if (reviewCollected > 0)
+                {
+                    product.LastScraping = DateTime.UtcNow;
+                    await _scrapingRepository.UpdateProductAsync(product);
+                    await _notifHub.Clients.All.SendAsync("NewReviews", product.ProductAsin, reviewCollected.ToString(), DateTime.UtcNow);
+                }
                 swProduct.Stop();
                 _logger.LogInformation(
                     $"{reviewCollected} review scrap on {pageNumber - 1} pages for product {product.ProductName}-{product.ProductAsin} in {swProduct.ElapsedMilliseconds} ms");
             }
-
             swMain.Stop();
             _logger.LogInformation($"{products.Count} products scrap in {swMain.ElapsedMilliseconds} ms ");
         }

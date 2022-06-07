@@ -15,17 +15,22 @@ namespace WebScrapingWorker.BgService
         private readonly AppConfig _appConfig;
         private readonly ILogger<WebScrapingService> _logger;
         private readonly IScrapingService _scrapingService;
+        private readonly IHubContext<NotifHub> _notifHub;
 
         public WebScrapingService(IScrapingService scrapingService, AppConfig appConfig,
-            ILogger<WebScrapingService> logger)
+            ILogger<WebScrapingService> logger, IHubContext<NotifHub> notifHub)
         {
             _scrapingService = scrapingService;
             _appConfig = appConfig;
             _logger = logger;
+            _notifHub = notifHub;
         }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
+            //Test signal R
+            //await _notifHub.Clients.All.SendCoreAsync("NewReviews", new object[]{"Init","123", DateTime.UtcNow}, stoppingToken);
+            //await _notifHub.Clients.All.SendAsync("NewReviews", "Init2","1234", DateTime.UtcNow,stoppingToken);
             while (!stoppingToken.IsCancellationRequested)
                 try
                 {

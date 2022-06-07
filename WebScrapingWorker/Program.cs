@@ -49,6 +49,7 @@ namespace WebScrapingWorker
                 })
                 .ConfigureServices((hostContext, services) =>
                 {
+                    services.AddSignalR();
                     services.AddFromConfiguration<AppConfig>(Configuration);
                     services.AddDatabase();
                     services.AddTransient<IScrapingRepository, ScrapingRepository>();
@@ -62,7 +63,7 @@ namespace WebScrapingWorker
                                 .SetIsOriginAllowed((host) => true)
                                 .AllowCredentials();
                         }));
-                    services.AddSignalR();
+                    
                     services.AddHostedService<WebScrapingService>();
                 });
         }
