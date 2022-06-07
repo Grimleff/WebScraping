@@ -138,7 +138,7 @@ namespace WebScrapingWorker.Extensions
                     : htmlReviewProfileName
                         .InnerText;
             }
-            catch (Exception e)
+            catch (Exception)
             {
                 return string.Empty;
             }

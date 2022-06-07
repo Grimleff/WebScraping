@@ -1,5 +1,9 @@
-﻿using System.IO;
+﻿using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
 using System.IO.Compression;
+using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
@@ -25,26 +29,26 @@ namespace WebScrapingWorker.Service.Implementation
             _appConfig = appConfig;
             _logger = logger;
         }
-
-        public async Task AddNewProduct(Product product)
-        {
-            var result = await _scrapingRepository.AddOrUpdateProduct(product);
-        }
+        
         public async Task GetProductsDataFromAmazonWebPage()
         {
-            var products = await _scrapingRepository.GetProductsAsync();
+            var dbProducts = await _scrapingRepository.GetEnableProductsAsync();
+            var products = dbProducts.ToList();
+            var swMain = new Stopwatch();
+            swMain.Start();
             foreach (var product in products)
             {
-                //https://www.amazon.com/product-reviews/B082XY23D5/ref=cm_cr_arp_d_paging_btm_next_2?pageNumber=1
-
                 var pageNumber = 1;
                 var pageExist = true;
-                while (pageExist)
+                var reviewEnoughRecent = true;
+                var reviewCollected = 0;
+                var swProduct = new Stopwatch();
+                swProduct.Start();
+                while (pageExist && reviewEnoughRecent)
                 {
-                    var url = $"{_appConfig.AmazonBaseUrl}/{product.ProductAsin}?pageNumber={pageNumber}";
+                    var url = $"{_appConfig.AmazonBaseUrl}/{product.ProductAsin}?sortBy=recent&pageNumber={pageNumber}";
                     _logger.LogInformation($"url to scrap : {url}");
                     
-                    //https://stackoverflow.com/questions/30899113/httpclient-returning-special-characters-but-nothing-readable
                     _httpClient.DefaultRequestHeaders.TryAddWithoutValidation("Accept", "text/html,application/xhtml+xml,application/xml");
                     _httpClient.DefaultRequestHeaders.TryAddWithoutValidation("Accept-Encoding", "gzip, deflate");
                     _httpClient.DefaultRequestHeaders.TryAddWithoutValidation("User-Agent", "Mozilla/5.0 (Windows NT 6.2; WOW64; rv:19.0) Gecko/20100101 Firefox/19.0");
@@ -84,12 +88,21 @@ namespace WebScrapingWorker.Service.Implementation
 
                     foreach (var webReview in webReviews.Elements())
                     {
+                        var reviewDate = webReview
+                            .SelectSingleNode(".//span[@data-hook='review-date']")
+                            .Date();
+
+                        if (reviewDate<product.LastScraping)
+                        {
+                            reviewEnoughRecent = false;
+                            break;
+                        }
                         var reviewTitle = webReview
                             .SelectSingleNode(".//*[@data-hook='review-title']/span")
                             .Title();
                         
                         var reviewContent = webReview
-                            .SelectSingleNode(".//span[@class='a-size-base review-text review-text-content']")
+                            .SelectSingleNode(".//span[contains(@data-hook, 'review-body')]/span")
                             .Review();
 
                         var reviewCard= webReview
@@ -104,10 +117,6 @@ namespace WebScrapingWorker.Service.Implementation
                         var reviewCountry = webReview
                             .SelectSingleNode(".//span[@data-hook='review-date']")
                             .Country();
-
-                        var reviewDate = webReview
-                            .SelectSingleNode(".//span[@data-hook='review-date']")
-                            .Date();
                         
                         //Verified Purchase
                         var reviewVerified = webReview
@@ -123,7 +132,6 @@ namespace WebScrapingWorker.Service.Implementation
                             .SelectSingleNode(".//span[@class='a-profile-name']")
                             .Profile();
                         
-
                         var review = new Review
                         {
                             Card = reviewCard,
@@ -138,10 +146,22 @@ namespace WebScrapingWorker.Service.Implementation
                             ProductId = product.IdProduct
                         };
                         await _scrapingRepository.AddOrUpdateReview(review);
+                        reviewCollected++;
                     }
                     pageNumber++;
                 }
+                product.LastScraping = DateTime.UtcNow;
+                await _scrapingRepository.UpdateProductAsync(product);
+                swProduct.Stop();
+                _logger.LogInformation($"{reviewCollected} review scrap on {pageNumber-1} pages for product {product.ProductName}-{product.ProductAsin} in {swProduct.ElapsedMilliseconds} ms");
             }
+            swMain.Stop();
+            _logger.LogInformation($"{products.Count} products scrap in {swMain.ElapsedMilliseconds} ms ");
+        }
+
+        public async Task AddNewProduct(Product product)
+        {
+            await _scrapingRepository.AddOrUpdateProduct(product);
         }
     }
 }

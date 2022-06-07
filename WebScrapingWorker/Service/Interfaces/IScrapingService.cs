@@ -1,11 +1,13 @@
-﻿using System.Threading.Tasks;
+﻿using System.Collections.Generic;
+using System.Threading.Tasks;
 using WebScrapingData.Model;
 
 namespace WebScrapingWorker.Service.Interfaces
 {
     public interface IScrapingService
     {
-        Task AddNewProduct(Product product);
         Task GetProductsDataFromAmazonWebPage();
+
+        Task AddNewProduct(Product product);
     }
 }

@@ -52,7 +52,7 @@ namespace WebScrapingWorker.Extensions
             {
                 return int.Parse(webReviewValidation.Split(" ")[0]);
             }
-            catch (Exception e)
+            catch (Exception)
             {
                 return 0;
             }

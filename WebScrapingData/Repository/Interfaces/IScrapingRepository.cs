@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using WebScrapingData.Model;
 
@@ -8,13 +9,16 @@ namespace WebScrapingData.Repository.Interfaces
     {
         Task<Product> GetProductAsync(string productAsin);
         Task<IEnumerable<Product>> GetProductsAsync();
+        Task<IEnumerable<Product>> GetEnableProductsAsync();
         
         Task<int> AddProductAsync(Product product);
         Task<int> AddProductsAsync(IEnumerable<Product> products);
         Task<int> UpdateProductAsync(Product product);
 
         Task<Review> GetReviewAsync(string reviewCard);
-        Task<IEnumerable<Review>> GetReviewAsync();
+        Task<IEnumerable<Review>> GetReviewsAsync();
+        Task<IEnumerable<Review>> GetReviewsFromAsinProductAsync(string productAsin);
+        Task<IEnumerable<Review>> GetReviewsFromAsinsProductAsync(string[] productAsin, DateTime reviewMaxLastDate);
 
         Task<int> AddReviewAsync(Review review);
         Task<int> AddReviewsAsync(IEnumerable<Review> reviews);

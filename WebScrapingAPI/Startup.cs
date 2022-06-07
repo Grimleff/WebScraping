@@ -11,6 +11,9 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
+using WebScrapingData.Extensions;
+using WebScrapingData.Repository.Implementation;
+using WebScrapingData.Repository.Interfaces;
 
 namespace WebScrapingAPI
 {
@@ -26,8 +29,13 @@ namespace WebScrapingAPI
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddDatabase();
+            services.AddTransient<IScrapingRepository, ScrapingRepository>();
 
-            services.AddControllers();
+            services.AddCors();
+            
+            services.AddControllers().AddNewtonsoftJson();
+            services.AddSwaggerGenNewtonsoftSupport();
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "WebScrapingAPI", Version = "v1" });

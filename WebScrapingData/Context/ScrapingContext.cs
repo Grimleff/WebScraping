@@ -32,6 +32,27 @@ namespace WebScrapingData.Context
                 builder.Entity<Review>()
                     .HasOne(p => p.Product)
                     .WithMany(b => b.Reviews);
+
+                builder.Entity<Product>()
+                    .HasData(
+                        new List<Product>
+                        {
+                            new()
+                            {
+                                IdProduct = 1,
+                                ProductName = "Samsung Galaxy S21",
+                                ProductAsin = "B082XY23D5",
+                                Enable = true
+                            },
+                            new ()
+                            {
+                                IdProduct = 2,
+                                ProductName = "Logitech MX Keys",
+                                ProductAsin = "B07S92QBCJ",
+                                Enable = true
+                            }
+                        }
+                );
             }
     }
 }

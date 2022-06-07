@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using WebScrapingData.Context;
@@ -23,6 +25,11 @@ namespace WebScrapingData.Repository.Implementation
             return await Db.Products.ToListAsync();
         }
 
+        public async Task<IEnumerable<Product>> GetEnableProductsAsync()
+        {
+            return await Db.Products.Where(x=>x.Enable).ToListAsync();
+        }
+        
         public async Task<int> AddProductAsync(Product product)
         {
             await Db.AddAsync(product);
@@ -39,6 +46,7 @@ namespace WebScrapingData.Repository.Implementation
         {
             var dbProduct = await Db.Products.FirstOrDefaultAsync(x => x.ProductAsin.Equals(product.ProductAsin));
             product.IdProduct = dbProduct.IdProduct;
+            product.LastScraping = dbProduct.LastScraping;
             Db.Entry(dbProduct).CurrentValues.SetValues(product);
             return await Db.SaveChangesAsync();
         }
@@ -48,9 +56,25 @@ namespace WebScrapingData.Repository.Implementation
             return await Db.Reviews.FirstOrDefaultAsync(x=>x.Card.Equals(reviewCard));
         }
 
-        public async Task<IEnumerable<Review>> GetReviewAsync()
+        public async Task<IEnumerable<Review>> GetReviewsAsync()
         {
             return await Db.Reviews.ToListAsync();
+        }
+
+        public async Task<IEnumerable<Review>> GetReviewsFromAsinProductAsync(string productAsin)
+        {
+            var product = await Db.Products.FirstOrDefaultAsync(x => x.ProductAsin.Equals(productAsin));
+            return await Db.Reviews.Where(x=>x.ProductId == product.IdProduct).OrderBy(x=>x.IdReview).ToListAsync();
+        }
+
+        public async Task<IEnumerable<Review>> GetReviewsFromAsinsProductAsync(string[] productAsin, DateTime reviewMaxLastDate)
+        {
+            var products = await Db.Products.Where(x => productAsin.Contains(x.ProductAsin)).Select(x=>x.IdProduct).ToListAsync();
+            return await Db.Reviews
+                .Where(x=> products.Contains(x.ProductId) && x.ReviewDate>= reviewMaxLastDate)
+                .OrderBy(x=>x.ProductId)
+                .ThenBy(x=>x.IdReview)
+                .ToListAsync();
         }
 
         public async Task<int> AddReviewAsync(Review review)
