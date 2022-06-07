@@ -32,7 +32,7 @@ namespace WebScrapingWorker.Extensions
         {
             try
             {
-                return webReviewCountry.Split("on")[0].Trim().Replace("Reviewed in the", "");
+                return webReviewCountry.Split("on")[0].Replace("Reviewed in the", "").Trim();
             }
             catch (Exception)
             {

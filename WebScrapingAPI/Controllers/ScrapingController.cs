@@ -113,7 +113,7 @@ namespace WebScrapingAPI.Controllers
         /// <param name="asins">List of product ASIN (amazon ref)</param>
         /// <param name="since">Date limit to get customer review</param>
         /// <returns></returns>
-        [HttpGet]
+        [HttpPost]
         [Route(@"reviews_from_products", Name = "reviews_from_products")]
         [Produces("application/json")]
         [ProducesResponseType(StatusCodes.Status200OK)]
