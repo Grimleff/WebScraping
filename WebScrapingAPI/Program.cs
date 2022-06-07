@@ -19,7 +19,6 @@ namespace WebScrapingAPI
                     webBuilder.UseKestrel(options =>
                     {
                         options.Listen(IPAddress.Any, 5000);
-                        options.Listen(IPAddress.Loopback, 5001);
                     });
 
                     webBuilder.UseStartup<Startup>();
