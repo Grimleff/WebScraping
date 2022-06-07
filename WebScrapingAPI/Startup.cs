@@ -1,15 +1,8 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.HttpsPolicy;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
 using WebScrapingData.Extensions;
 using WebScrapingData.Repository.Implementation;
@@ -32,13 +25,11 @@ namespace WebScrapingAPI
             services.AddDatabase();
             services.AddTransient<IScrapingRepository, ScrapingRepository>();
 
-            services.AddCors();
-            
             services.AddControllers().AddNewtonsoftJson();
             services.AddSwaggerGenNewtonsoftSupport();
             services.AddSwaggerGen(c =>
             {
-                c.SwaggerDoc("v1", new OpenApiInfo { Title = "WebScrapingAPI", Version = "v1" });
+                c.SwaggerDoc("v1", new OpenApiInfo {Title = "WebScrapingAPI", Version = "v1"});
             });
         }
 
@@ -52,16 +43,13 @@ namespace WebScrapingAPI
                 app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "WebScrapingAPI v1"));
             }
 
-            app.UseHttpsRedirection();
-
+            app.UseDefaultFiles();
+            app.UseStaticFiles();
             app.UseRouting();
 
             app.UseAuthorization();
 
-            app.UseEndpoints(endpoints =>
-            {
-                endpoints.MapControllers();
-            });
+            app.UseEndpoints(endpoints => { endpoints.MapControllers(); });
         }
     }
 }

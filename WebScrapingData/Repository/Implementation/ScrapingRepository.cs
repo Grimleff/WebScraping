@@ -11,7 +11,7 @@ namespace WebScrapingData.Repository.Implementation
 {
     public class ScrapingRepository : RepositoryBase, IScrapingRepository
     {
-        public ScrapingRepository(DbContextFactory contextFactory) : base (contextFactory)
+        public ScrapingRepository(DbContextFactory contextFactory) : base(contextFactory)
         {
         }
 
@@ -27,9 +27,9 @@ namespace WebScrapingData.Repository.Implementation
 
         public async Task<IEnumerable<Product>> GetEnableProductsAsync()
         {
-            return await Db.Products.Where(x=>x.Enable).ToListAsync();
+            return await Db.Products.Where(x => x.Enable).ToListAsync();
         }
-        
+
         public async Task<int> AddProductAsync(Product product)
         {
             await Db.AddAsync(product);
@@ -53,7 +53,7 @@ namespace WebScrapingData.Repository.Implementation
 
         public async Task<Review> GetReviewAsync(string reviewCard)
         {
-            return await Db.Reviews.FirstOrDefaultAsync(x=>x.Card.Equals(reviewCard));
+            return await Db.Reviews.FirstOrDefaultAsync(x => x.Card.Equals(reviewCard));
         }
 
         public async Task<IEnumerable<Review>> GetReviewsAsync()
@@ -64,16 +64,18 @@ namespace WebScrapingData.Repository.Implementation
         public async Task<IEnumerable<Review>> GetReviewsFromAsinProductAsync(string productAsin)
         {
             var product = await Db.Products.FirstOrDefaultAsync(x => x.ProductAsin.Equals(productAsin));
-            return await Db.Reviews.Where(x=>x.ProductId == product.IdProduct).OrderBy(x=>x.IdReview).ToListAsync();
+            return await Db.Reviews.Where(x => x.ProductId == product.IdProduct).OrderBy(x => x.IdReview).ToListAsync();
         }
 
-        public async Task<IEnumerable<Review>> GetReviewsFromAsinsProductAsync(string[] productAsin, DateTime reviewMaxLastDate)
+        public async Task<IEnumerable<Review>> GetReviewsFromAsinsProductAsync(string[] productAsin,
+            DateTime reviewMaxLastDate)
         {
-            var products = await Db.Products.Where(x => productAsin.Contains(x.ProductAsin)).Select(x=>x.IdProduct).ToListAsync();
+            var products = await Db.Products.Where(x => productAsin.Contains(x.ProductAsin)).Select(x => x.IdProduct)
+                .ToListAsync();
             return await Db.Reviews
-                .Where(x=> products.Contains(x.ProductId) && x.ReviewDate>= reviewMaxLastDate)
-                .OrderBy(x=>x.ProductId)
-                .ThenBy(x=>x.IdReview)
+                .Where(x => products.Contains(x.ProductId) && x.ReviewDate >= reviewMaxLastDate)
+                .OrderBy(x => x.ProductId)
+                .ThenBy(x => x.IdReview)
                 .ToListAsync();
         }
 
@@ -96,26 +98,18 @@ namespace WebScrapingData.Repository.Implementation
             Db.Entry(dbReview).CurrentValues.SetValues(review);
             return await Db.SaveChangesAsync();
         }
-        
+
         public async Task<int> AddOrUpdateProduct(Product product)
         {
             var dbProduct = await GetProductAsync(product.ProductAsin);
-            if (dbProduct == null)
-            {
-                return await AddProductAsync(product);
-                
-            }
+            if (dbProduct == null) return await AddProductAsync(product);
             return await UpdateProductAsync(product);
         }
-        
+
         public async Task<int> AddOrUpdateReview(Review review)
         {
             var dbReview = await GetReviewAsync(review.Card);
-            if (dbReview == null)
-            {
-                return await AddReviewAsync(review);
-                
-            }
+            if (dbReview == null) return await AddReviewAsync(review);
             return await UpdateReviewAsync(review);
         }
     }

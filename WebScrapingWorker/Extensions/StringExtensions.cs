@@ -1,5 +1,4 @@
 ﻿using System;
-using Microsoft.VisualBasic.CompilerServices;
 
 namespace WebScrapingWorker.Extensions
 {
@@ -16,7 +15,7 @@ namespace WebScrapingWorker.Extensions
                 return null;
             }
         }
-        
+
         public static DateTime? ExtractDateTime(this string webReviewDate)
         {
             try
@@ -28,7 +27,7 @@ namespace WebScrapingWorker.Extensions
                 return null;
             }
         }
-        
+
         public static string ExtractCountry(this string webReviewCountry)
         {
             try
@@ -45,7 +44,7 @@ namespace WebScrapingWorker.Extensions
         {
             return webReviewVerified.Contains("Verified Purchase");
         }
-        
+
         public static int ExtractReviewValidations(this string webReviewValidation)
         {
             try
@@ -57,6 +56,5 @@ namespace WebScrapingWorker.Extensions
                 return 0;
             }
         }
-        
     }
 }

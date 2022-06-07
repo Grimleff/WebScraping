@@ -9,10 +9,12 @@ namespace WebScrapingData.Service
     public class DatabaseInitializerService : IHostedService
     {
         private readonly DbContextFactory _contextFactory;
+
         public DatabaseInitializerService(DbContextFactory contextFactory)
         {
             _contextFactory = contextFactory;
         }
+
         public async Task StartAsync(CancellationToken cancellationToken)
         {
             await using var context = _contextFactory.CreateContext();

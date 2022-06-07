@@ -3,9 +3,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using SQLitePCL;
-using WebScrapingData.Model;
-using WebScrapingData.Repository.Interfaces;
 using WebScrapingWorker.Config;
 using WebScrapingWorker.Service.Interfaces;
 
@@ -13,17 +10,18 @@ namespace WebScrapingWorker.BgService
 {
     public class WebScrapingService : BackgroundService
     {
-        private readonly IScrapingService _scrapingService;
         private readonly AppConfig _appConfig;
         private readonly ILogger<WebScrapingService> _logger;
-        
-        public WebScrapingService(IScrapingService scrapingService, AppConfig appConfig, ILogger<WebScrapingService> logger)
+        private readonly IScrapingService _scrapingService;
+
+        public WebScrapingService(IScrapingService scrapingService, AppConfig appConfig,
+            ILogger<WebScrapingService> logger)
         {
             _scrapingService = scrapingService;
             _appConfig = appConfig;
             _logger = logger;
         }
-        
+
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
             while (!stoppingToken.IsCancellationRequested)

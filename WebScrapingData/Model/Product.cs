@@ -12,27 +12,26 @@ namespace WebScrapingData.Model
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         [Column("id_product")]
         [JsonProperty("id_product")]
-        public int IdProduct {get;set;}
-        
+        public int IdProduct { get; set; }
+
         [Required]
         [Column("product_asin")]
         [JsonProperty("product_asin")]
-        public string ProductAsin {get;set;}
-        
-        
+        public string ProductAsin { get; set; }
+
+
         [Column("product_name")]
         [JsonProperty("product_name")]
-        public string ProductName{get;set;}
-        
+        public string ProductName { get; set; }
+
         [Column("last_scraping")]
         [JsonProperty("last_scraping")]
-        public DateTime LastScraping{get;set;}
-        
+        public DateTime LastScraping { get; set; }
+
         [Column("enable")]
         [JsonProperty("enable")]
-        public bool Enable{get;set;}
-        
-        [JsonIgnore]
-        public List<Review> Reviews { get; set; }
+        public bool Enable { get; set; }
+
+        [JsonIgnore] public List<Review> Reviews { get; set; }
     }
 }

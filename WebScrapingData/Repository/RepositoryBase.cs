@@ -14,7 +14,7 @@ namespace WebScrapingData.Repository
         }
 
         protected ScrapingContext Db => _scrapingContext ??= _contextFactory.CreateContext();
-        
+
         public void Dispose()
         {
             _scrapingContext?.Dispose();

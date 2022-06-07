@@ -8,10 +8,7 @@
 
         public static int LimitPageSize(this int? pageSize)
         {
-            if (pageSize is >= 0)
-            {
-                return pageSize.Value <= MaxPageSize ? pageSize.Value : MaxPageSize;
-            }
+            if (pageSize is >= 0) return pageSize.Value <= MaxPageSize ? pageSize.Value : MaxPageSize;
             return DefaultPageSize;
         }
 

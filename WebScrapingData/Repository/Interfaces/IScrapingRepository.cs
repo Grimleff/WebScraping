@@ -10,7 +10,7 @@ namespace WebScrapingData.Repository.Interfaces
         Task<Product> GetProductAsync(string productAsin);
         Task<IEnumerable<Product>> GetProductsAsync();
         Task<IEnumerable<Product>> GetEnableProductsAsync();
-        
+
         Task<int> AddProductAsync(Product product);
         Task<int> AddProductsAsync(IEnumerable<Product> products);
         Task<int> UpdateProductAsync(Product product);

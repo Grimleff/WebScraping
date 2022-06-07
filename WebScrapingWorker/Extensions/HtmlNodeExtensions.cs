@@ -6,6 +6,24 @@ namespace WebScrapingWorker.Extensions
 {
     public static class HtmlNodeExtensions
     {
+        public static string ProductName(this HtmlNode htmlProductTitle)
+        {
+            try
+            {
+                return htmlProductTitle == null
+                    ? string.Empty
+                    : htmlProductTitle
+                        .InnerText
+                        .Split(":")
+                        .Last()
+                        .Trim();
+            }
+            catch (Exception)
+            {
+                return string.Empty;
+            }
+        }
+
         public static string Title(this HtmlNode htmlReviewTitleNode)
         {
             try
@@ -29,7 +47,7 @@ namespace WebScrapingWorker.Extensions
                     : htmlReviewNode
                         .InnerText
                         .Trim()
-                        .Replace(@"\n","");
+                        .Replace(@"\n", "");
             }
             catch (Exception)
             {
@@ -117,7 +135,7 @@ namespace WebScrapingWorker.Extensions
         {
             try
             {
-                return htmlReviewValidationsNode == null 
+                return htmlReviewValidationsNode == null
                     ? 0
                     : htmlReviewValidationsNode
                         .InnerText
