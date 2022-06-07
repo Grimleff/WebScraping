@@ -1,0 +1,11 @@
+1- more powerful database storage : sqlite is a choice only to work on demonstration use case
+
+2- more error management and log if scraping failed
+
+3- improve or change way to alert when new review are available (rabbitMQ or other messaging solution like kafka)
+
+4- add new endpoint to add features (smartest data consultation, view list of product, delete them, ...)
+
+5- be careful about captcha 
+
+6- implement review update for already existing record in database
