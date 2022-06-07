@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using WebScrapingWorker.Config;
+using WebScrapingWorker.Hubs;
 using WebScrapingWorker.Service.Interfaces;
 
 namespace WebScrapingWorker.BgService

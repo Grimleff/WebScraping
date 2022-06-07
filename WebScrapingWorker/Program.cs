@@ -1,3 +1,5 @@
+using System.Net;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -32,6 +34,14 @@ namespace WebScrapingWorker
         private static IHostBuilder CreateHostBuilder(string[] args)
         {
             return Host.CreateDefaultBuilder(args)
+                .ConfigureWebHostDefaults(webBuilder =>
+                {
+                    webBuilder.UseKestrel(options =>
+                    {
+                        options.Listen(IPAddress.Any, 5005);
+                    });
+                    webBuilder.UseStartup<Startup>();
+                })
                 .ConfigureLogging(logging =>
                 {
                     logging.ClearProviders();
@@ -44,6 +54,15 @@ namespace WebScrapingWorker
                     services.AddTransient<IScrapingRepository, ScrapingRepository>();
                     services.AddTransient<IScrapingService, ScrapingService>();
                     services.AddHttpClient<IScrapingService, ScrapingService>();
+                    services.AddCors(options => options.AddPolicy("CorsPolicy",
+                        builder =>
+                        {
+                            builder.AllowAnyHeader()
+                                .AllowAnyMethod()
+                                .SetIsOriginAllowed((host) => true)
+                                .AllowCredentials();
+                        }));
+                    services.AddSignalR();
                     services.AddHostedService<WebScrapingService>();
                 });
         }

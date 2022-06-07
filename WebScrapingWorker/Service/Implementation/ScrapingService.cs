@@ -6,11 +6,13 @@ using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
 using HtmlAgilityPack;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Logging;
 using WebScrapingData.Model;
 using WebScrapingData.Repository.Interfaces;
 using WebScrapingWorker.Config;
 using WebScrapingWorker.Extensions;
+using WebScrapingWorker.Hubs;
 using WebScrapingWorker.Service.Interfaces;
 
 namespace WebScrapingWorker.Service.Implementation
@@ -21,18 +23,21 @@ namespace WebScrapingWorker.Service.Implementation
         private readonly HttpClient _httpClient;
         private readonly ILogger<ScrapingService> _logger;
         private readonly IScrapingRepository _scrapingRepository;
+        private readonly IHubContext<NotifHub> _notifHub;
 
         public ScrapingService(IScrapingRepository scrapingRepository, HttpClient httpClient, AppConfig appConfig,
-            ILogger<ScrapingService> logger)
+            ILogger<ScrapingService> logger, IHubContext<NotifHub> notifHub)
         {
             _scrapingRepository = scrapingRepository;
             _httpClient = httpClient;
             _appConfig = appConfig;
             _logger = logger;
+            _notifHub = notifHub;
         }
 
         public async Task GetProductsDataFromAmazonWebPage()
         {
+            await _notifHub.Clients.All.SendAsync("ReceiveMessage", "toto", "blague");
             var dbProducts = await _scrapingRepository.GetEnableProductsAsync();
             var products = dbProducts.ToList();
             var swMain = new Stopwatch();
@@ -176,11 +181,6 @@ namespace WebScrapingWorker.Service.Implementation
 
             swMain.Stop();
             _logger.LogInformation($"{products.Count} products scrap in {swMain.ElapsedMilliseconds} ms ");
-        }
-
-        public async Task AddNewProduct(Product product)
-        {
-            await _scrapingRepository.AddOrUpdateProduct(product);
         }
     }
 }
